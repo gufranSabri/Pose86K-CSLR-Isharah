@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import torch
 from torch.utils.data import Dataset
@@ -9,8 +8,8 @@ lipsUpperOuter = [61, 185, 40, 39, 37, 0, 267, 269, 270, 291]
 lipsLowerOuter = [146, 91, 181, 84, 17, 314, 405, 321, 375, 291]
 lips = sorted(set(lipsUpperOuter + lipsLowerOuter))  # Remove duplicates and sort
 NUM_LIPS = 20  # after deduplication
-class PoseDataset(Dataset):
 
+class PoseDataset(Dataset):
     def __init__(self, dataset_name2, pkl_path, label_csv, split_type, target_enc_df, 
                  transform=None, augmentations=True, augmentations_prob=0.5, additional_joints=False):
 
@@ -29,13 +28,11 @@ class PoseDataset(Dataset):
         self.labels = []
 
         self.all_data = pd.read_csv(label_csv, delimiter="|")
-    #    self.all_data = self.all_data[self.all_data["id"].notna() & self.all_data["gloss"].notna()]
 
         for _, row in self.all_data.iterrows():
             sample_id = int(row["id"])
            
             enc_label = target_enc_df[target_enc_df["id"] == sample_id]["enc"]
-           # print("sample_id", sample_id)
             if  sample_id in self.pose_dict:
                
                 self.files.append(sample_id)
@@ -64,9 +61,7 @@ class PoseDataset(Dataset):
             
         right_hand = pose_data[:, 0:21, :]
         left_hand = pose_data[:, 21:42, :]
-        #lips = pose_data[:, 42+NUM_LIPS, :]
         lips = pose_data[:, 42:42+NUM_LIPS, :]
-
         body =  pose_data[:, 42+NUM_LIPS:, :]
 
         for ii in range(T):

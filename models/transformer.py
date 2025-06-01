@@ -41,7 +41,7 @@ class TransformerEncoder(nn.TransformerEncoderLayer):
         return src
 
 class CSLRTransformer(nn.Module):
-    def __init__(self, num_classes, input_dim=42, d_model=512, nhead=8, num_layers=3, dropout=0.1):
+    def __init__(self, num_classes, input_dim=42, d_model=512, nhead=8, num_layers=2, dropout=0.1):
         super(CSLRTransformer, self).__init__()
         self.d_model = d_model
         self.pose_embed = nn.Linear(input_dim*2, d_model)
@@ -51,7 +51,22 @@ class CSLRTransformer(nn.Module):
             TransformerEncoder(d_model=d_model, nhead=nhead, dropout=dropout, batch_first=True),
             num_layers=num_layers
         )
-        
+
+        self.transformer_encoder2 = nn.TransformerEncoder(
+            TransformerEncoder(d_model=d_model, nhead=nhead, dropout=dropout, batch_first=True),
+            num_layers=num_layers
+        )
+
+        self.transformer_encoder3 = nn.TransformerEncoder(
+            TransformerEncoder(d_model=d_model, nhead=nhead, dropout=dropout, batch_first=True),
+            num_layers=num_layers
+        )
+
+        self.transformer_encoder4 = nn.TransformerEncoder(
+            TransformerEncoder(d_model=d_model, nhead=nhead, dropout=dropout, batch_first=True),
+            num_layers=num_layers
+        )
+
         self.temporal_pool_1 = nn.AvgPool1d(kernel_size=2, stride=2)  
         self.temporal_pool_2 = nn.AvgPool1d(kernel_size=2, stride=2)
         self.tcn_1 = nn.Conv1d(in_channels=d_model, out_channels=512, kernel_size=5, padding=1)
@@ -63,6 +78,8 @@ class CSLRTransformer(nn.Module):
             nn.Linear(128, num_classes)
         )
 
+        print("MODEL: BASEDEEP")
+
     def forward(self, poses):
         poses = poses.view(poses.shape[0], poses.shape[1], -1)  # Flatten last two dims new shape (B, T, D)
         poses = self.pose_embed(poses)
@@ -71,6 +88,9 @@ class CSLRTransformer(nn.Module):
         src = poses + pos_embd.to(poses.device)
 
         encoder_output = self.transformer_encoder(src)
+        encoder_output = self.transformer_encoder2(encoder_output) + encoder_output
+        encoder_output = self.transformer_encoder3(encoder_output) + encoder_output
+        encoder_output = self.transformer_encoder4(encoder_output) + encoder_output
 
         encoder_output = self.temporal_pool_1(encoder_output.transpose(1, 2)).transpose(1, 2)
         encoder_output = self.tcn_1(encoder_output.transpose(1, 2)).transpose(1, 2)  # (B, T/2, TCN channels)
@@ -79,4 +99,5 @@ class CSLRTransformer(nn.Module):
 
         logits = self.fc(encoder_output)
         return logits
+
 

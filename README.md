@@ -10,9 +10,20 @@ The tasks include:
 
 ## Updates
 * Test Set released (June 2nd, 2025)
-  * ```./utils/test/``` contains dataloader and evaluation script for the test set.
-  * ```./annotations_testphase/``` now has test set annotations without labels; to be used with the test script.
 
+#### Instructions for the Test Set
+1. Download SI_test.txt or US_test.txt from `./annotations_v2/SI` or `./annotations_v2/US` directory respectively.
+   - For **Signer Independent** task, place it in `./annotations_v2/SI`.
+   - For **Unseen Sentences** task, place it in `./annotations_v2/US`.
+
+2. Download the test data from CodaLab and place in `./annotations_v2/SI` or `./annotations_v2/US` depending on the task.
+
+3. Change the model in ```test_script.py``` on line 229 to your model.
+
+4. Run the test script:
+   ```bash
+   python test_script.py --work_dir ./work_dir/test --w_path <path to your model weights> --mode SI
+   ```
 
 
 ## Baseline Overview

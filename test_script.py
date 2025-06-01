@@ -1,22 +1,21 @@
 
 
-from model2 import *
 from data_loader_test import PoseDataset
+from utils.datasetv2 import PoseDatasetV2
 import torch
-from torch import nn
 import os
 from torch.utils.data import  DataLoader
-from utils import *
-from decoder import Decode
+from utils.decode import Decode
 import os
 import torch
 import shutil
-from model3 import TransformerModel
+from models.transformer import CSLRTransformer
 
 import pandas as pd
 import torch
-from metrics import normalize_gloss_sequence
-
+from utils.metrics import normalize_gloss_sequence
+from tqdm import tqdm
+import argparse
 
 def remove_duplicates(x):
     if len(x) < 2:
@@ -101,8 +100,6 @@ def get_autoreg_vocab(char_list):
         inv_ctc_map[i] = char
     return ctc_map, inv_ctc_map, char_list
 
-
-import pandas as pd
 
 def convert_text_for_ctc(dataset_name, train_csv, dev_csv, test_csv):
     """
@@ -196,91 +193,76 @@ def convert_text_for_ctc(dataset_name, train_csv, dev_csv, test_csv):
 
     return train_processed, dev_processed, test_processed, vocab_map, inv_vocab_map, vocab_list
 
-######## CHANGE WORK DIR
-work_dir = "work_dir/isharah1000_test/"
-if os.path.exists(work_dir):
-    answer = input('Current dir exists, do you want to remove and refresh it?\n')
-    if answer in ['yes', 'y', 'ok', '1']:
-        shutil.rmtree(work_dir)
-        os.makedirs(work_dir)
-else:
-    os.makedirs(work_dir)
+
+def main(args):
+    if os.path.exists(args.work_dir):
+        answer = input('Current dir exists, do you want to remove and refresh it?\n')
+        if answer in ['yes', 'y', 'ok', '1']:
+            shutil.rmtree(args.work_dir)
+            os.makedirs(args.work_dir)
+    else:
+        os.makedirs(args.work_dir)
+
+    test_pkl_file_path = f"./annotations_v2/SI/pose_data_isharah1000_{args.mode}_test.pkl 
+
+    gpu_id =0 # Change this to the GPU you want to use (0, 1, 2, etc.)
+    num_workers = 10
+    device = torch.device(f"cuda:{gpu_id}" if torch.cuda.is_available() else "cpu")
+    print ('device', device)
+
+    train_csv = f"./annotations_v2/{args.mode}/train.txt"
+    dev_csv = f"./annotations_v2/{args.mode}/dev.txt"
+    test_csv = f"./annotations_v2/{args.mode}/{args.mode}_test.txt"
+
+    _, _, test_processed, vocab_map, inv_vocab_map, vocab_list = convert_text_for_ctc("isharah", train_csv, dev_csv, test_csv)
+    print("Vocabulary: ", len(vocab_map))
+
+    decoder_dec= Decode(vocab_map, len(vocab_list), 'beam')
+
+    # CHANGE DATASET HERE ===============================================
+    dataset_test = PoseDataset("isharah",test_pkl_file_path, test_csv , "test", test_processed, augmentations =False, additional_joints=args.additional_joints)
+    testdataloader = DataLoader(dataset_test, batch_size=1, shuffle=False, num_workers=num_workers)
+    # CHANGE DATASET HERE ===============================================
 
 
-dataset_name = "isharah"
+    # CHANGE MODEL HERE ===============================================
+    model = CSLRTransformer(input_dim=86, num_classes=len(vocab_map)).to(device)
+    msg = model.load_state_dict(torch.load(args.w_path))
+    print("Model weights:", msg)
+    # /CHANGE MODEL HERE ===============================================
+
+    preds = []
+    print("\n ***** Evaluation Test ******")
+    predictions_file = f"{args.work_dir}/test.csv"
+    with open(predictions_file, "w") as pred_file:
+        pred_file.write(f"id,gloss\n")
+
+        with torch.no_grad():
+            for i, (video, poses, labels) in tqdm(enumerate(testdataloader), ncols=100, desc="Testing", total=len(testdataloader)):
+                poses = poses.to(device)
+
+                logits= model(poses)
+
+                vid_lgt = torch.full((logits.size(0),), logits.size(1), dtype=torch.long).to(device)
+                decoded_list = decoder_dec.decode(logits, batch_first=True, probs=False, vid_lgt=vid_lgt)
+                flat_preds = [gloss for pred in decoded_list for gloss, _ in pred]
+                current_preds = ' '.join(flat_preds)
+                preds.append(current_preds)
+
+                pred_file.write(f"{i+1},{current_preds}\n")
+
+    print(f"Saved final gloss predictions to: {predictions_file}")
+
+
+
+if __name__ == '__main__':
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--work_dir', dest='work_dir', default="./work_dir/test")
+    parser.add_argument('--w_path', dest='w_path', required=True)
+    parser.add_argument('--additional_joints', dest='additional_joints', default="1")
+    parser.add_argument('--mode', dest='mode', default="SI")
+
+    args=parser.parse_args()
+    args.additional_joints = True if args.additional_joints == "1" else False
     
-######## pkl file of test set
-test_pkl_file_path = "/data/sharedData/ICCV_challenge_test_sets/SI/pose_data_isharah1000_SI_test.pkl" 
-
-gpu_id =1 # Change this to the GPU you want to use (0, 1, 2, etc.)
-
-batch_size = 1
-num_workers = 10
-
-learning_rate = 0.0001
-num_epochs = 300
-
-device = torch.device(f"cuda:{gpu_id}" if torch.cuda.is_available() else "cpu")
-print ('device', device)
-
-train_csv = "/data/sharedData/ICCV_challenge_test_sets/SI/train.txt"
-dev_csv = "/data/sharedData/ICCV_challenge_test_sets/SI/dev.txt"
-test_csv = "/data/sharedData/ICCV_challenge_test_sets/SI/SI_test.txt"
-
-train_processed, dev_processed, test_processed, vocab_map, inv_vocab_map, vocab_list = convert_text_for_ctc(dataset_name, train_csv, dev_csv, test_csv)
-print("Vocabulary: ", len(vocab_map))
-
-decoder_dec= Decode(inv_vocab_map, len(vocab_list), 'beam')
-
-dataset_test = PoseDataset(dataset_name,test_pkl_file_path, test_csv , "test", test_processed, augmentations =False , additional_joints=False)
-testdataloader = DataLoader(dataset_test, batch_size=1, shuffle=False, num_workers=num_workers)
-
-
-model = TransformerModel(
-    output_dim=len(vocab_list), 
-    d_input=(((21 *2)) * 2),  # Adjust input dimension for CSLR 21 * 2 * 2
-    d_model=512, #256
-    nhead=8, 
-    num_layers=3, 
-    dropout=0.1
-).to(device)
-
-
-model.load_state_dict(torch.load('/home/sarah_alyami/Documents/Codes/Pose-CSLR/work_dir/isharah1000_test/best_model.pt'))
-
-log_file = f"{work_dir}/testing_log.txt"
-if os.path.exists(log_file):
-    os.remove(log_file)  # Remove previous log if exists
-
-preds = []
-gt_labels = []
-print("\n ***** Evaluation Test ******")
-predictions_file = f"{work_dir}/test.csv"
-with open(predictions_file, "w") as pred_file:
-
-    with torch.no_grad():
-        for i, (video, poses, labels) in enumerate(testdataloader):
-            poses = poses.to(device)
-
-            # Forward Pass
-            logits= model(poses)
-
-
-
-            # 🔹 Greedy CTC Decoding (instead of Beam Search)
-            decoded_list = decoder_dec.decode(logits, batch_first=True, probs=False)
-            flat_preds = [gloss for pred in decoded_list for gloss, _ in pred]  # Flatten list
-            current_preds = ' '.join(flat_preds)  # Convert list to string
-            preds.append(current_preds)
-            # Convert ground truth labels
-            output_gloss_file = f"{work_dir}/predicted_glosses.txt"
-            pred_file.write(f"{current_preds}\n")
-
-print(f"Saved final gloss predictions to: {predictions_file}")
-            
-
-                
-
-
-
-        
+    main(args)
