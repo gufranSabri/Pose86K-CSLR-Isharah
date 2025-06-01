@@ -7,6 +7,14 @@ The tasks include:
 1. **Signer Independent** [View Competition](https://www.kaggle.com/competitions/continuous-sign-language-recognition-iccv-2025)
 2. **Unseen Sentences** [View Competition](https://www.kaggle.com/competitions/continuous-slr-task-2-iccv-2025)
 
+
+## Updates
+* Test Set released (June 2nd, 2025)
+  * ```./utils/test/``` contains dataloader and evaluation script for the test set.
+  * ```./annotations_testphase/``` now has test set annotations without labels; to be used with the test script.
+
+
+
 ## Baseline Overview
 
 We use a simple **Transformer model** to produce the baseline for these tasks. The architecture of the baseline model is shown below:
@@ -15,8 +23,8 @@ We use a simple **Transformer model** to produce the baseline for these tasks. T
 
 | Task              | Baseline Dev (WER) |
 |-------------------|----------|
-| **Signer Independent** | 46.53% |
-| **Unseen Sentences**    | 92.75% |
+| **Signer Independent** | 25.1% |
+| **Unseen Sentences**    | 87.6% |
 
 ## Setup Instructions
 

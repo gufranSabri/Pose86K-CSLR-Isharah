@@ -18,12 +18,11 @@ from utils.metrics import wer_list
 from torchvision import transforms
 from utils.datasetv2 import PoseDatasetV2
 
-from models.transformer import SlowFastCSLR, PoseCSLRTransformer
+from models.transformer import CSLRTransformer
 
 
 MODELS = {
-    "base": PoseCSLRTransformer,
-    "slowfast": SlowFastCSLR
+    "base": CSLRTransformer,
 }
 
 def set_rng_state(seed):
@@ -121,7 +120,7 @@ def main(args):
     traindataloader = DataLoader(dataset_train, batch_size=1, shuffle=True, num_workers=10)
     devdataloader = DataLoader(dataset_dev, batch_size=1, shuffle=False, num_workers=10)
     
-    model = MODELS[args.model](input_dim=86*2, num_classes=len(vocab_map)).to(device)
+    model = MODELS[args.model](input_dim=86, num_classes=len(vocab_map)).to(device)
 
     decoder_dec = Decode(vocab_map, len(vocab_list), 'beam')
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
