@@ -12,15 +12,16 @@ The tasks include:
 * Test Set released (June 2nd, 2025)
 
 #### Instructions for the Test Set
-1. Download SI_test.txt or US_test.txt from `./annotations_v2/SI` or `./annotations_v2/US` directory respectively.
+1. Download `test_script.py` and `data_loader_test.py` and place in the root directory of your project
+2. Download SI_test.txt or US_test.txt from `./annotations_v2/SI` or `./annotations_v2/US` directory respectively.
    - For **Signer Independent** task, place it in `./annotations_v2/SI`.
    - For **Unseen Sentences** task, place it in `./annotations_v2/US`.
 
-2. Download the test data from CodaLab and place in `./annotations_v2/SI` or `./annotations_v2/US` depending on the task.
+3. Download the test data from CodaLab and place in `./annotations_v2/SI` or `./annotations_v2/US` depending on the task.
 
-3. Change the model in ```test_script.py``` on line 229 to your model.
+4. Change the model in ```test_script.py``` on line 229 to your model.
 
-4. Run the test script:
+5. Run the test script:
    ```bash
    python test_script.py --work_dir ./work_dir/test --w_path <path to your model weights> --mode SI
    ```
