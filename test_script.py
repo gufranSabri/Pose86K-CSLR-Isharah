@@ -203,7 +203,7 @@ def main(args):
     else:
         os.makedirs(args.work_dir)
 
-    test_pkl_file_path = f"./annotations_v2/SI/pose_data_isharah1000_{args.mode}_test.pkl 
+    test_pkl_file_path = f"./annotations_v2/SI/pose_data_isharah1000_{args.mode}_test.pkl"
 
     gpu_id =0 # Change this to the GPU you want to use (0, 1, 2, etc.)
     num_workers = 10
