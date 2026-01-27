@@ -107,16 +107,13 @@ def main(args):
     make_workdir(args.work_dir)
     device = torch.device(f"cuda:{args.device}" if torch.cuda.is_available() else "cpu")
         
-    train_csv = os.path.join(args.data_dir, f"isharah1000/annotations/{args.mode}/train.txt")
-    dev_csv = os.path.join(args.data_dir, f"isharah1000/annotations/{args.mode}/dev.txt")
-    
-    train_csv = f"./annotations_v2/{args.mode}/train.txt"
-    dev_csv = f"./annotations_v2/{args.mode}/dev.txt"
+    train_csv = f"./annotations_v2/isharah2000/{args.mode}/train.txt"
+    dev_csv = f"./annotations_v2/isharah2000/{args.mode}/dev.txt"
 
     train_processed, dev_processed, vocab_map, inv_vocab_map, vocab_list = convert_text_for_ctc("isharah", train_csv, dev_csv)
 
-    dataset_train = PoseDatasetV2("isharah", train_csv , "train", train_processed , augmentations=True , transform=transforms.Compose([GaussianNoise()]))
-    dataset_dev = PoseDatasetV2("isharah", dev_csv , "dev", dev_processed, augmentations=False)
+    dataset_train = PoseDatasetV2("isharah", train_csv , "train", train_processed , augmentations=True , transform=transforms.Compose([GaussianNoise()]), mode=args.mode)
+    dataset_dev = PoseDatasetV2("isharah", dev_csv , "dev", dev_processed, augmentations=False, mode=args.mode)
     traindataloader = DataLoader(dataset_train, batch_size=1, shuffle=True, num_workers=10)
     devdataloader = DataLoader(dataset_dev, batch_size=1, shuffle=False, num_workers=10)
     
@@ -170,7 +167,7 @@ def main(args):
 if __name__ == '__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--work_dir', dest='work_dir', default="./work_dir/test")
-    parser.add_argument('--data_dir', dest='data_dir', default="/data/sharedData/Smartphone/")
+    parser.add_argument('--data_dir', dest='data_dir', default="./data")
     parser.add_argument('--mode', dest='mode', default="SI")
     parser.add_argument('--model', dest='model', default="base")
     parser.add_argument('--device', dest='device', default="0")

@@ -1,1 +1,14 @@
-data/*
+make_phase_data.py
+remove_overlap.py
+make_phase1_data.py
+test_script.py
+data_loader_test.py
+annotations_v2/isharah2000_raw
+annotations_v2/isharah2000_sub
+annotations_v2/isharah1000
+annotations_v2/isharah2000/SI/test.csv
+annotations_v2/isharah2000/US/test.csv
+./annotations_v2/isharah2000/SI/test.csv
+./annotations_v2/isharah2000/US/test.csv
+.vscode/*
+.DS_Store

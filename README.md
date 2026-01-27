@@ -4,14 +4,14 @@
 Welcome to the Pose Estimation repository! This repository contains the starter kit for the **MSLR CSLR Track** and provides a simple baseline for two important tasks in Continuous Sign Language Recognition (CSLR).
 
 The tasks include:
-1. **Signer Independent** [View Competition](https://www.kaggle.com/competitions/continuous-sign-language-recognition-iccv-2025)
-2. **Unseen Sentences** [View Competition](https://www.kaggle.com/competitions/continuous-slr-task-2-iccv-2025)
+1. **Signer Independent** [View Competition](https://www.codabench.org/competitions/13266/)
+2. **Unseen Sentences** [View Competition](https://www.codabench.org/competitions/13267/)
 
 
-## Updates
-* Test Set released (June 2nd, 2025)
+<!-- ## Updates
+* Test Set released (Feb 15, 2026) -->
 
-#### Instructions for the Test Set
+<!-- #### Instructions for the Test Set
 1. Download `test_script.py` and `data_loader_test.py` and place in the root directory of your project
 2. Download SI_test.txt or US_test.txt from `./annotations_v2/SI` or `./annotations_v2/US` directory respectively.
    - For **Signer Independent** task, place it in `./annotations_v2/SI`.
@@ -24,7 +24,7 @@ The tasks include:
 5. Run the test script:
    ```bash
    python test_script.py --work_dir ./work_dir/test --w_path <path to your model weights> --mode SI
-   ```
+   ``` -->
 
 
 ## Baseline Overview
@@ -35,8 +35,8 @@ We use a simple **Transformer model** to produce the baseline for these tasks. T
 
 | Task              | Baseline Dev (WER) |
 |-------------------|----------|
-| **Signer Independent** | 25.1% |
-| **Unseen Sentences**    | 87.6% |
+| **Signer Independent** | 20.12% |
+| **Unseen Sentences**    | 80.31% |
 
 ## Setup Instructions
 
@@ -48,7 +48,7 @@ Follow these steps to set up the environment and get started:
    cd Pose86K-CSLR-Isharah
    ```
 
-2. **Download the dataset** from [here](https://www.kaggle.com/competitions/continuous-sign-language-recognition-iccv-2025/data). Place the dataset in the `./data` folder.
+2. **Download the dataset** from [TASK 1](https://www.kaggle.com/datasets/gufransabri3/mslr-task1); [TASK 2](https://www.kaggle.com/datasets/gufransabri3/mslr-task2). Place the dataset in the `./data` folder.
 
 3. **Set up the Python environment**:
    - Install `virtualenv`:

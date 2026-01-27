@@ -123,7 +123,7 @@ class PoseDatasetV2(Dataset):
 
     
 
-    def __init__(self, dataset_name2, label_csv, split_type, target_enc_df, transform=None, augmentations=True, augmentations_prob=0.5, additional_joints=True):
+    def __init__(self, dataset_name2, label_csv, split_type, target_enc_df, transform=None, augmentations=True, augmentations_prob=0.5, additional_joints=True, mode="SI"):
 
         self.dataset_name = dataset_name2
         self.split_type = split_type  # "train", "dev", "test"
@@ -132,7 +132,11 @@ class PoseDatasetV2(Dataset):
         self.augmentations_prob = augmentations_prob
         self.additional_joints = additional_joints
         
-        with open(os.path.join("./data/pose_data_isharah1000_hands_lips_body_May12.pkl"), 'rb') as f:
+
+        assert os.path.exists(f"./data/pose_data_isharah2000_hands_lips_body_phase1_{mode}.pkl"), "Pose data file not found in the specified path."
+        
+        dataset_path = f"./data/pose_data_isharah2000_hands_lips_body_phase1_{mode}.pkl"
+        with open(dataset_path, 'rb') as f:
             self.pose_dict = pickle.load(f)
 
         self.files = []
