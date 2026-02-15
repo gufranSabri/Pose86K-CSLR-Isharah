@@ -6,7 +6,7 @@ data_loader_test.py
 annotations_v2/isharah2000_raw
 annotations_v2/isharah2000_sub
 annotations_v2/isharah1000
-./annotations_v2/isharah2000/SI/test_orig.csv
-./annotations_v2/isharah2000/US/test_orig.csv
+annotations_v2/isharah2000/SI/test_orig.csv
+annotations_v2/isharah2000/US/test_orig.csv
 .vscode/*
 .DS_Store
