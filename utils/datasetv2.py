@@ -133,9 +133,9 @@ class PoseDatasetV2(Dataset):
         self.additional_joints = additional_joints
         
 
-        assert os.path.exists(f"./data/pose_data_isharah2000_hands_lips_body_phase1_{mode}.pkl"), "Pose data file not found in the specified path."
+        assert os.path.exists(f"./data/pose_data_isharah2000_hands_lips_body_phase2_{mode}.pkl"), "Pose data file not found in the specified path."
         
-        dataset_path = f"./data/pose_data_isharah2000_hands_lips_body_phase1_{mode}.pkl"
+        dataset_path = f"./data/pose_data_isharah2000_hands_lips_body_phase2_{mode}.pkl"
         with open(dataset_path, 'rb') as f:
             self.pose_dict = pickle.load(f)
 
